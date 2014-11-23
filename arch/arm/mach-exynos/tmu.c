@@ -69,7 +69,9 @@ static DEFINE_MUTEX(tmu_lock);
 
 #if (defined(CONFIG_CPU_EXYNOS4212) || defined(CONFIG_CPU_EXYNOS4412)) \
 	&& defined(CONFIG_VIDEO_MALI400MP)
+#ifndef CONFIG_MALI_VER_R4P0
 #define CONFIG_TC_VOLTAGE /* Temperature compensated voltage */
+#endif
 #endif
 
 static unsigned int get_curr_temp(struct s5p_tmu_info *info)
