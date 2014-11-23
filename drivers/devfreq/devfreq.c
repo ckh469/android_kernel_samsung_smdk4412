@@ -25,7 +25,7 @@
 #include <linux/list.h>
 #include <linux/printk.h>
 #include <linux/hrtimer.h>
-#include <linux/pm_qos_params.h>
+#include <linux/pm_qos.h>
 #include "governor.h"
 
 struct class *devfreq_class;
