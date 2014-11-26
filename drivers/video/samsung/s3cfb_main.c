@@ -42,10 +42,19 @@
 #endif
 
 #ifdef CONFIG_FB_S5P_MDNIE
+
+#ifdef CONFIG_MACH_KONA
+
+#include "s3cfb_mdnie_kona.h"
+#include "mdnie_kona.h"
+#else
 #include "s3cfb_mdnie.h"
+
 #include "mdnie.h"
 #endif
+#endif
 #ifdef CONFIG_HAS_WAKELOCK
+
 #include <linux/wakelock.h>
 #include <linux/earlysuspend.h>
 #include <linux/suspend.h>
@@ -204,13 +213,13 @@ int s3cfb_wait_for_vsync(struct s3cfb_global *fbdev, u32 timeout)
 	s3cfb_activate_vsync(fbdev);
 	if (timeout) {
 		ret = wait_event_interruptible_timeout(fbdev->vsync_info.wait,
-						!ktime_equal(timestamp,
-						fbdev->vsync_info.timestamp),
-						msecs_to_jiffies(timeout));
+					!ktime_equal(timestamp,
+					fbdev->vsync_info.timestamp),
+					msecs_to_jiffies(timeout));
 	} else {
 		ret = wait_event_interruptible(fbdev->vsync_info.wait,
-						!ktime_equal(timestamp,
-						fbdev->vsync_info.timestamp));
+					!ktime_equal(timestamp,
+					fbdev->vsync_info.timestamp));
 	}
 
 	sysfs_notify(&fbdev->dev->kobj,
@@ -399,31 +408,18 @@ static ssize_t fimd_dump_show(struct device *dev,
 }
 static DEVICE_ATTR(fimd_dump, 0444, fimd_dump_show, NULL);
 
-static ssize_t s3c_fb_vsync_time(struct device *dev,
-                struct device_attribute *attr, char *buf)
-{
-	struct s3cfb_global *fbdev[1];
-	fbdev[0] = fbfimd->fbdev[0];
-
-    	return snprintf(buf, PAGE_SIZE, "%llu",
-			((fbdev[0] != 0) ?
-			ktime_to_ns(fbdev[0]->vsync_info.timestamp) : 0));
-}
-
-static DEVICE_ATTR(vsync_time, S_IRUGO, s3c_fb_vsync_time, NULL);
-
 static ssize_t vsync_event_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
 {
 	struct s3cfb_global *fbdev[1];
 	fbdev[0] = fbfimd->fbdev[0];
 
-	return snprintf(buf, PAGE_SIZE, "VSYNC=%llu",
+	return snprintf(buf, PAGE_SIZE, "%llu",
 			((fbdev[0] != 0) ?
 			ktime_to_ns(fbdev[0]->vsync_info.timestamp) : 0));
 }
 
-static DEVICE_ATTR(vsync_event, 0444, vsync_event_show, NULL);
+static DEVICE_ATTR(vsync_time, S_IRUGO, vsync_event_show, NULL);
 
 #if defined(CONFIG_FB_S5P_VSYNC_THREAD)
 static int s3cfb_wait_for_vsync_thread(void *data)
@@ -440,14 +436,8 @@ static int s3cfb_wait_for_vsync_thread(void *data)
 				fbdev->vsync_info.timestamp) &&
 				fbdev->vsync_info.active);
 
-		SAMSUNGROM {
-		sysfs_notify(&fbdev->fb[pdata->default_win]->dev->kobj,
-				NULL, "vsync_event");
-		}
-
-		AOSPROM {
-                sysfs_notify(&fbdev->dev->kobj, NULL, "vsync_time");
-		}
+		sysfs_notify(&fbdev->dev->kobj,
+				NULL, "vsync_time");
 	}
 
 	return 0;
@@ -603,7 +593,11 @@ void s3cfb_early_suspend(struct early_suspend *h)
 		ret = s3cfb_display_off(fbdev[i]);
 
 #ifdef CONFIG_FB_S5P_MDNIE
+#ifdef CONFIG_MACH_KONA
+	ret += mdnie_display_off();
+#else
 		ret += mdnie_display_off();
+#endif
 #endif
 
 		if (ret > 0)
@@ -640,12 +634,6 @@ void s3cfb_early_suspend(struct early_suspend *h)
 		s5p_sysmmu_disable(fbdev[0]->dev);
 	}
 #endif
-
-#ifdef CONFIG_SPEEDUP_EARLYSUSPEND
-//Lycan.Wang@Prd.BasicDrv, 2013-08-31 Add for speedup wakeup
-	//printk(KERN_EMERG "%s:%d\n", __func__, __LINE__);
-	request_speedup_late_resume();
-#endif /* CONFIG_SPEEDUP_EARLYSUSPEND */
 
 	dev_info(info->dev, "-%s\n", __func__);
 
@@ -713,7 +701,11 @@ void s3cfb_late_resume(struct early_suspend *h)
 		 */
 		s3cfb_set_alpha_value(fbdev[i], 1);
 #ifdef CONFIG_FB_S5P_MDNIE
+#ifdef CONFIG_MACH_KONA
+		mdnie_display_on(fbdev[i]);
+#else
 		mdnie_display_on();
+#endif
 #endif
 		s3cfb_display_on(fbdev[i]);
 
@@ -1133,7 +1125,7 @@ static int s3cfb_probe(struct platform_device *pdev)
 			dev_err(fbdev[i]->dev, "failed to allocate for	\
 				global fb structure fimd[%d]!\n", i);
 				ret = -ENOMEM;
-			goto err1;
+			goto err0;
 		}
 
 		fbdev[i]->dev = &pdev->dev;
@@ -1162,7 +1154,7 @@ static int s3cfb_probe(struct platform_device *pdev)
 			goto err1;
 		}
 		res = request_mem_region(res->start,
-					res->end - res->start + 1, pdev->name);
+				res->end - res->start + 1, pdev->name);
 		if (!res) {
 			dev_err(fbdev[i]->dev,
 				"failed to request io memory region\n");
@@ -1222,7 +1214,11 @@ static int s3cfb_probe(struct platform_device *pdev)
 #ifdef CONFIG_FB_S5P_MDNIE
 		/*  only FIMD0 is supported */
 		if (i == 0)
+#ifdef CONFIG_MACH_KONA
 			mdnie_setup();
+#else
+			mdnie_setup();
+#endif
 #endif
 		/* hw setting */
 		s3cfb_init_global(fbdev[i]);
@@ -1255,7 +1251,12 @@ static int s3cfb_probe(struct platform_device *pdev)
 				pdata->set_display_path();
 
 			s3cfb_set_dualrgb(fbdev[i], S3C_DUALRGB_MDNIE);
+
+#ifdef CONFIG_MACH_KONA
+			mdnie_display_on(fbdev[i]);
+#else
 			mdnie_display_on();
+#endif
 		}
 #endif
 		s3cfb_enable_window(fbdev[0], pdata->default_win);
@@ -1280,10 +1281,6 @@ static int s3cfb_probe(struct platform_device *pdev)
 		fbdev[i]->early_suspend.suspend = s3cfb_early_suspend;
 		fbdev[i]->early_suspend.resume = s3cfb_late_resume;
 		fbdev[i]->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB;
-#ifdef CONFIG_SPEEDUP_EARLYSUSPEND
-//Lycan.Wang@Prd.BasicDrv, 2013-08-31 Add for speedup wakeup
-		fbdev[i]->early_suspend.need_speedup = 1,
-#endif /* CONFIG_SPEEDUP_EARLYSUSPEND */
 
 		register_early_suspend(&fbdev[i]->early_suspend);
 #endif
@@ -1295,8 +1292,8 @@ static int s3cfb_probe(struct platform_device *pdev)
 		mutex_init(&fbdev[i]->vsync_info.irq_lock);
 
 		fbdev[i]->vsync_info.thread = kthread_run(
-						s3cfb_wait_for_vsync_thread,
-						fbdev[i], "s3c-fb-vsync");
+					s3cfb_wait_for_vsync_thread,
+					fbdev[i], "s3c-fb-vsync");
 		if (fbdev[i]->vsync_info.thread == ERR_PTR(-ENOMEM)) {
 			dev_err(fbdev[i]->dev, "failed to run vsync thread\n");
 			fbdev[i]->vsync_info.thread = NULL;
@@ -1310,14 +1307,10 @@ static int s3cfb_probe(struct platform_device *pdev)
 		if (ret < 0)
 			dev_err(fbdev[0]->dev, "failed to add sysfs entries\n");
 
-		ret = device_create_file(fbdev[i]->fb[pdata->default_win]->dev,
-					&dev_attr_vsync_event);
+		ret = device_create_file(fbdev[i]->dev,
+					&dev_attr_vsync_time);
 		if (ret < 0)
 			dev_err(fbdev[0]->dev, "failed to add sysfs entries\n");
-
-        	ret = device_create_file(fbdev[i]->dev, &dev_attr_vsync_time);
-        	if (ret < 0)
-            	    	dev_err(fbdev[0]->dev, "failed to add sysfs entries\n");
 
 #ifdef CONFIG_FB_S5P_GD2EVF
 		ret = device_create_file(fbdev[i]->dev, &dev_attr_lcd_switch);
