@@ -242,7 +242,7 @@ rom_feature_set_sysctl(struct ctl_table *table, int write,
                      loff_t *ppos)
 {
         int error;
-        static int rom_feature_set_save = 7; //aosp by default
+        static int rom_feature_set_save = 0;
 
         error = proc_dointvec(table, write, buffer, lenp, ppos);
         if (error)
