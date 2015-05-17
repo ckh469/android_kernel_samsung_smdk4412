@@ -46,10 +46,14 @@ if [ "$2" = "latest" ] || [ "$3" = "latest" ]; then
 TOOLCHAIN_PATH="/opt/arm-cortex_a9-linux-gnueabihf-linaro_4.9/bin"
 TOOLCHAIN="$TOOLCHAIN_PATH/arm-cortex_a9-linux-gnueabihf-"
 cp -f Makefile.latest Makefile
-elif [ "$2" = "exp" ] || [ "$3" = "exp" ]; then
+elif [ "$2" = "arter97" ] || [ "$3" = "arter97" ]; then
 TOOLCHAIN_PATH="/opt/arm-linux-androideabi-5.1/bin"
 TOOLCHAIN="$TOOLCHAIN_PATH/arm-eabi-"
-cp -f Makefile.experimental Makefile
+cp -f Makefile.arter97 Makefile
+elif [ "$2" = "archi" ] || [ "$3" = "archi" ]; then
+TOOLCHAIN_PATH="/opt/Toolchain/bin"
+TOOLCHAIN="$TOOLCHAIN_PATH/arm-eabi-"
+cp -f Makefile.archi Makefile
 else
 TOOLCHAIN_PATH="toolchain/android-toolchain-eabi-4.9-2014.10/bin"
 TOOLCHAIN="$TOOLCHAIN_PATH/arm-eabi-"
