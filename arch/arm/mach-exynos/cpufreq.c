@@ -50,7 +50,7 @@ static struct regulator *arm_regulator;
 static struct cpufreq_freqs freqs;
 
 static bool exynos_cpufreq_disable;
-static bool exynos_cpufreq_lock_disable;
+bool exynos_cpufreq_lock_disable;
 static bool exynos_cpufreq_init_done;
 static DEFINE_MUTEX(set_freq_lock);
 static DEFINE_MUTEX(set_cpu_freq_lock);
@@ -276,6 +276,33 @@ int exynos_cpufreq_get_curfreq() {
 	
 	return policy->cur;
 }
+
+int exynos_cpufreq_get_level_ret(unsigned int freq)
+{
+	struct cpufreq_frequency_table *table;
+	unsigned int i;
+
+	if (!exynos_cpufreq_init_done)
+		return -EINVAL;
+
+	table = cpufreq_frequency_get_table(0);
+	if (!table) {
+		pr_err("%s: Failed to get the cpufreq table\n", __func__);
+		return -EINVAL;
+	}
+
+	for (i = exynos_info->max_support_idx;
+		(table[i].frequency != CPUFREQ_TABLE_END); i++) {
+		if (table[i].frequency == freq) {
+			return i;
+		}
+	}
+
+	pr_err("%s: %u KHz is an unsupported cpufreq\n", __func__, freq);
+
+	return -EINVAL;
+}
+EXPORT_SYMBOL_GPL(exynos_cpufreq_get_level_ret);
 
 atomic_t exynos_cpufreq_lock_count;
 
@@ -744,7 +771,8 @@ static struct notifier_block exynos_cpufreq_policy_notifier = {
 
 static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 {
-	int ret;
+	int retval;
+
 	policy->cur = policy->min = policy->max = exynos_getspeed(policy->cpu);
 
 	cpufreq_frequency_table_get_attr(exynos_info->freq_table, policy->cpu);
@@ -765,7 +793,7 @@ static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		cpumask_setall(policy->cpus);
 	}
 
-	cpufreq_frequency_table_cpuinfo(policy, exynos_info->freq_table);
+	retval = cpufreq_frequency_table_cpuinfo(policy, exynos_info->freq_table);
 
 	/* Safe default startup limits */
 #ifndef CONFIG_CPU_EXYNOS4210
@@ -776,7 +804,7 @@ static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		policy->max = 1400000;
 	policy->min = 200000;
 
-	return 0;
+	return retval;
 }
 
 static int exynos_cpufreq_reboot_notifier_call(struct notifier_block *this,

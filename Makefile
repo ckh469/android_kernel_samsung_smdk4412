@@ -372,7 +372,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -std=gnu89
 
 # ckh469 optimizations
-KBUILD_CFLAGS	+= -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfloat-abi=hard -mfpu=neon
+KBUILD_CFLAGS	+= -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon
 
 # L1/L2 cache size parameters by @JustArchi
 KBUILD_CFLAGS	+= --param l1-cache-size=32 --param l1-cache-line-size=32 --param l2-cache-size=1024

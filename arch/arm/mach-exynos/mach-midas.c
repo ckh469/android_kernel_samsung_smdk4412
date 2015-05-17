@@ -60,11 +60,6 @@
 #if defined(CONFIG_CHARGER_MAX8922_U1)
 #include <linux/power/max8922_charger_u1.h>
 #endif
-
-#ifdef CONFIG_BT_BCM4334
-#include <mach/board-bluetooth-bcm.h>
-#endif
-
 #ifdef CONFIG_STMPE811_ADC
 #include <linux/stmpe811-adc.h>
 #endif
@@ -1616,9 +1611,9 @@ static void motor_init_hw(void)
 
 static void motor_en(bool enable)
 {
-	gpio_direction_output(EXYNOS4_GPY2(2), enable);
-	printk(KERN_DEBUG "[VIB] motor_enabled GPIO GPY2(2) : %d\n",
-	       gpio_get_value(EXYNOS4_GPY2(2)));
+	gpio_direction_output(EXYNOS4_GPD0(0), enable);
+	printk(KERN_DEBUG "[VIB] motor_enabled GPIO GPD0(0) : %d\n",
+	       gpio_get_value(EXYNOS4_GPD0(0)));
 }
 #endif
 
@@ -2572,7 +2567,7 @@ static struct samsung_battery_platform_data samsung_battery_pdata = {
 	.freeze_stop_temp = -50,
 	.freeze_recovery_temp = 0,
 #elif defined(CONFIG_MACH_T0_USA_SPR)
-	.overheat_stop_temp = 515,
+	.overheat_stop_temp = 470,
 	.overheat_recovery_temp = 420,
 	.freeze_stop_temp = -80,
 	.freeze_recovery_temp = -10,
@@ -4268,7 +4263,7 @@ static void __init exynos4_reserve_mem(void)
 #ifdef CONFIG_EXYNOS_C2C
 		"samsung-c2c=c2c_shdmem;"
 #endif
-		"s3cfb.0=fimd;exynos4-fb.0=fimd;"
+		"s3cfb.0=fimd;exynos4-fb.0=fimd;samsung-pd.1=fimd;"
 		"s3c-fimc.0=fimc0;s3c-fimc.1=fimc1;s3c-fimc.2=fimc2;s3c-fimc.3=fimc3;"
 		"exynos4210-fimc.0=fimc0;exynos4210-fimc.1=fimc1;exynos4210-fimc.2=fimc2;exynos4210-fimc.3=fimc3;"
 #ifdef CONFIG_ION_EXYNOS

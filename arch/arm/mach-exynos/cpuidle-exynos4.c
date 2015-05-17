@@ -728,7 +728,7 @@ static int exynos4_enter_core0_lpa(struct cpuidle_device *dev,
 #endif
 
 	if (log_en)
-		pr_debug("+++lpa\n");
+		pr_info("+++lpa\n");
 
 	do_gettimeofday(&before);
 
@@ -818,7 +818,7 @@ early_wakeup:
 	do_gettimeofday(&after);
 
 	if (log_en)
-		pr_debug("---lpa\n");
+		pr_info("---lpa\n");
 
 #if defined(CONFIG_INTERNAL_MODEM_IF) || defined(CONFIG_SAMSUNG_PHONE_TTY)
 	gpio_set_value(GPIO_PDA_ACTIVE, 1);
@@ -846,7 +846,7 @@ static struct cpuidle_state exynos4_cpuidle_set[] = {
 	[0] = {
 		.enter			= exynos4_enter_idle,
 		.exit_latency		= 1,
-		.target_residency	= 5,
+		.target_residency	= 500,
 		.flags			= CPUIDLE_FLAG_TIME_VALID,
 		.name			= "IDLE",
 		.desc			= "ARM clock gating(WFI)",

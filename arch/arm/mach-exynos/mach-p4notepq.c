@@ -42,11 +42,6 @@
 #ifdef CONFIG_BATTERY_SEC_PX
 #include <linux/power/sec_battery_px.h>
 #endif
-
-#ifdef CONFIG_BT_BCM4334
-#include <mach/board-bluetooth-bcm.h>
-#endif
-
 #include <linux/power_supply.h>
 #ifdef CONFIG_STMPE811_ADC
 #include <linux/stmpe811-adc.h>

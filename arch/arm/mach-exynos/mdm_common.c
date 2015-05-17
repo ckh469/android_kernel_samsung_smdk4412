@@ -58,6 +58,10 @@ static const char rmnet_pm_dev[] = "mdm_hsic_pm0";
 #include <linux/poll.h>
 #endif
 
+#ifdef CONFIG_FAST_BOOT
+#include <linux/reboot.h>
+#endif
+
 #define MDM_MODEM_TIMEOUT	6000
 #define MDM_MODEM_DELTA	100
 #define MDM_BOOT_TIMEOUT	60000L
