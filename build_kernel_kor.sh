@@ -15,9 +15,9 @@ else
 fi
 
 if [ "$TARGET" = "m440s" ] ; then
-	displayversion=Devil3.4-0.5.3.D-$TARGET
+	displayversion=Devil3.4-0.5.3.E-$TARGET
 else
-	displayversion=Devil3.4-0.5.3.D-e210-$TARGET
+	displayversion=Devil3.4-0.5.3.E-e210-$TARGET
 fi
 
 version=$displayversion-dual-$(date +%Y%m%d)
@@ -47,7 +47,7 @@ TOOLCHAIN_PATH="/opt/arm-cortex_a9-linux-gnueabihf-linaro_4.9/bin"
 TOOLCHAIN="$TOOLCHAIN_PATH/arm-cortex_a9-linux-gnueabihf-"
 cp -f Makefile.latest Makefile
 elif [ "$2" = "arter97" ] || [ "$3" = "arter97" ]; then
-TOOLCHAIN_PATH="/opt/arm-linux-androideabi-5.1/bin"
+TOOLCHAIN_PATH="/opt/linaro-lto/bin"
 TOOLCHAIN="$TOOLCHAIN_PATH/arm-eabi-"
 cp -f Makefile.arter97 Makefile
 elif [ "$2" = "archi" ] || [ "$3" = "archi" ]; then
